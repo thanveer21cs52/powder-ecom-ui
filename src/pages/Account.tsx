@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -37,7 +37,7 @@ export default function Account() {
         setLoadingOrders(true);
         client.get('/orders/myorders')
           .then(res => setOrders(res.data.orders || []))
-          .catch(err => toast.error('Failed to load orders'))
+          .catch(() => toast.error('Failed to load orders'))
           .finally(() => setLoadingOrders(false));
       }
       
@@ -45,7 +45,7 @@ export default function Account() {
         setLoadingWishlist(true);
         client.get('/wishlist')
           .then(res => setWishlist(res.data.items || []))
-          .catch(err => toast.error('Failed to load wishlist'))
+          .catch(() => toast.error('Failed to load wishlist'))
           .finally(() => setLoadingWishlist(false));
       }
     }
@@ -102,6 +102,9 @@ export default function Account() {
             <div className="account-user-email">{user.email}</div>
           </div>
           <div className="account-nav">
+            {user.is_admin && (
+              <a onClick={() => navigate('/admin')} style={{ background: 'var(--green-pale)', color: 'var(--green-dark)', fontWeight: 700, border: '1px solid var(--green-mid)' }}>🛡️ Admin Dashboard</a>
+            )}
             <a onClick={() => setActiveTab('orders')} className={activeTab === 'orders' ? 'active' : ''}>📦 My Orders</a>
             <a onClick={() => setActiveTab('wishlist')} className={activeTab === 'wishlist' ? 'active' : ''}>♡ Wishlist</a>
             <a onClick={() => setActiveTab('profile')} className={activeTab === 'profile' ? 'active' : ''}>⚙️ Profile Settings</a>

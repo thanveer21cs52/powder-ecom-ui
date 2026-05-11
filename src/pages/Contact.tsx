@@ -1,10 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import client from '../api/client';
 
 export default function Contact() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    subject: 'Product Inquiry',
+    message: ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Message sent successfully!');
+    setLoading(true);
+    try {
+      const payload = {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message
+      };
+      await client.post('/contacts', payload);
+      toast.success('Message sent successfully!');
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        subject: 'Product Inquiry',
+        message: ''
+      });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to send message');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,27 +91,55 @@ export default function Contact() {
             <div className="form-row">
               <div className="form-group">
                 <label>First Name</label>
-                <input type="text" placeholder="Priya" required />
+                <input 
+                  type="text" 
+                  placeholder="Priya" 
+                  value={formData.firstName}
+                  onChange={e => setFormData({...formData, firstName: e.target.value})}
+                  required 
+                />
               </div>
               <div className="form-group">
                 <label>Last Name</label>
-                <input type="text" placeholder="Suresh" required />
+                <input 
+                  type="text" 
+                  placeholder="Suresh" 
+                  value={formData.lastName}
+                  onChange={e => setFormData({...formData, lastName: e.target.value})}
+                  required 
+                />
               </div>
             </div>
             
             <div className="form-group">
               <label>Email</label>
-              <input type="email" placeholder="priya@example.com" required />
+              <input 
+                type="email" 
+                placeholder="priya@example.com" 
+                value={formData.email}
+                onChange={e => setFormData({...formData, email: e.target.value})}
+                required 
+              />
             </div>
             
             <div className="form-group">
               <label>Phone</label>
-              <input type="tel" placeholder="+91 98765 43210" required />
+              <input 
+                type="tel" 
+                placeholder="+91 98765 43210" 
+                value={formData.phone}
+                onChange={e => setFormData({...formData, phone: e.target.value})}
+                required 
+              />
             </div>
             
             <div className="form-group">
               <label>Subject</label>
-              <select required>
+              <select 
+                value={formData.subject}
+                onChange={e => setFormData({...formData, subject: e.target.value})}
+                required
+              >
                 <option>Product Inquiry</option>
                 <option>Order Support</option>
                 <option>Bulk Order</option>
@@ -89,10 +150,18 @@ export default function Contact() {
             
             <div className="form-group">
               <label>Message</label>
-              <textarea placeholder="Tell us how we can help…" rows={5} required></textarea>
+              <textarea 
+                placeholder="Tell us how we can help…" 
+                rows={5} 
+                value={formData.message}
+                onChange={e => setFormData({...formData, message: e.target.value})}
+                required
+              ></textarea>
             </div>
             
-            <button type="submit" className="submit-btn">Send Message</button>
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? 'Sending...' : 'Send Message'}
+            </button>
           </form>
         </div>
       </div>

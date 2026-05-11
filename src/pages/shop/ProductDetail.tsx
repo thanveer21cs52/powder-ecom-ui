@@ -21,10 +21,13 @@ export default function ProductDetail() {
   const [selectedPrice, setSelectedPrice] = useState<number>(0);
   const [qty, setQty] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
+    setLoadingReviews(true);
     client.get(`/products/${id}`)
       .then(res => {
         const p = res.data.product;
@@ -44,6 +47,14 @@ export default function ProductDetail() {
             setRelated(relRes.data.products.filter((rp: any) => rp.id !== p.id).slice(0, 4));
           })
           .catch(console.error);
+          
+        // Fetch reviews
+        client.get(`/reviews/${p.id}`)
+          .then(revRes => {
+            setReviews(revRes.data.reviews || []);
+          })
+          .catch(console.error)
+          .finally(() => setLoadingReviews(false));
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -176,6 +187,33 @@ export default function ProductDetail() {
             <div className="feature-item">🌱 Pure & Natural</div>
           </div>
         </div>
+      </div>
+
+      <div className="product-reviews-section section-inner" style={{ marginTop: '60px' }}>
+        <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '32px' }}>Customer <span>Reviews</span></h2>
+        
+        {loadingReviews ? (
+          <div className="skeleton" style={{ height: '100px', width: '100%', borderRadius: '12px' }}></div>
+        ) : reviews.length > 0 ? (
+          <div className="reviews-list">
+            {reviews.map((rev: any) => (
+              <div key={rev.id} style={{ background: 'var(--white)', border: '1.5px solid var(--border)', borderRadius: '16px', padding: '24px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontWeight: 700 }}>{rev.user_name}</span>
+                  <span style={{ color: 'var(--green-dark)', fontWeight: 600 }}>{rev.rating} ⭐</span>
+                </div>
+                <p style={{ color: 'var(--text-mid)', fontSize: '14px', lineHeight: '1.6' }}>{rev.comment}</p>
+                <div style={{ fontSize: '12px', color: 'var(--text-light)', marginTop: '12px' }}>
+                  {new Date(rev.created_at).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ padding: '40px', background: 'var(--cream)', borderRadius: '16px', textAlign: 'center', color: 'var(--text-mid)' }}>
+            No reviews yet for this product. Be the first to share your experience!
+          </div>
+        )}
       </div>
 
       {related.length > 0 && (

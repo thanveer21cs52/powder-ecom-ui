@@ -16,7 +16,8 @@ export default function Navbar() {
     { name: 'Home', path: '/' },
     { name: 'Our Products', path: '/shop' },
     { name: 'About Us', path: '/about' },
-    { name: 'Contact Us', path: '/contact' }
+    { name: 'Contact Us', path: '/contact' },
+    ...(user?.is_admin ? [{ name: 'Admin', path: '/admin' }] : [])
   ];
 
   return (
