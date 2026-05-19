@@ -88,35 +88,6 @@ const AdminDashboard: React.FC = () => {
     tracking_id: ''
   });
 
-  const handleOrderStatusChange = async (order: any, newStatus: string) => {
-    if (newStatus === 'shipped' || newStatus === 'delivered') {
-      setEditingOrder(order);
-      setOrderForm({
-        status: newStatus,
-        payment_status: order.payment_status || 'pending',
-        post_service: order.post_service || '',
-        tracking_id: order.tracking_id || ''
-      });
-      return;
-    }
-    setLoading(true);
-    try {
-      await client.put(`/admin/orders/${order.id}/status`, {
-        status: newStatus,
-        payment_status: order.payment_status,
-        post_service: order.post_service || '',
-        tracking_id: order.tracking_id || ''
-      });
-      toast.success('Order status updated!');
-      await fetchData();
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to update status');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleOrderSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -475,19 +446,6 @@ const AdminDashboard: React.FC = () => {
     setViewingItem(item);
     setViewingType(type);
     setIsDetailModalOpen(true);
-  };
-
-  const toggleUserRole = async (user: any) => {
-    setLoading(true);
-    try {
-      await client.put(`/admin/users/${user.id}/role`, { is_admin: !user.is_admin });
-      toast.success('Role updated!');
-      await fetchData();
-    } catch (err: any) {
-      console.error(err);
-      toast.error('Failed to update role');
-      setLoading(false);
-    }
   };
 
   const SalesTrendChart = ({ data }: { data: any[] }) => {

@@ -41,11 +41,11 @@ export default function Feedback() {
       toast.success('Thank you! Feedback submitted successfully.');
       
       // Reset form (keep name/email if logged in)
-      setFormData(prev => ({
+      setFormData({
         name: user ? user.name || '' : '',
         email: user ? user.email || '' : '',
         message: ''
-      }));
+      });
       setRating(5);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to submit feedback');
