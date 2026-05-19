@@ -964,7 +964,7 @@ footer { background: var(--green-dark); color: var(--white); padding: 64px 24px 
 
 /* ===== ADMIN DASHBOARD ===== */
 .admin-layout { display: flex; height: 100vh; overflow: hidden; background: #f8fafc; }
-.admin-sidebar { width: 260px; height: 100vh; background: var(--green-dark); color: var(--white); padding: 24px 0; display: flex; flex-direction: column; flex-shrink: 0; }
+.admin-sidebar { width: 260px; height: 100vh; background: var(--green-dark); color: var(--white); padding: 0 0 24px; display: flex; flex-direction: column; flex-shrink: 0; }
 .admin-logo { padding: 0 24px 32px; font-size: 20px; font-weight: 800; color: var(--yellow); }
 .admin-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 12px; }
 .admin-nav button {
@@ -975,10 +975,11 @@ footer { background: var(--green-dark); color: var(--white); padding: 64px 24px 
 .admin-nav button:hover { background: rgba(255,255,255,0.1); color: var(--white); }
 .admin-nav button.active { background: var(--green-mid); color: var(--white); font-weight: 600; }
 
-.admin-main { flex: 1; min-width: 0; padding: 32px; height: 100vh; overflow-y: auto; }
+.admin-main { flex: 1; min-width: 0; padding: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
 .admin-header { 
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; 
-  background: var(--white); padding: 16px 24px; border-radius: 16px; border: 1.5px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; 
+  background: var(--white); padding: 16px 32px; border-bottom: 1.5px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
 }
 .admin-header h2 { font-size: 20px; font-weight: 800; color: var(--green-dark); margin: 0; }
 .admin-user-profile { display: flex; align-items: center; gap: 12px; }
@@ -1110,4 +1111,54 @@ main { flex: 1; }
 .star-btn:active {
   transform: scale(0.9);
 }
+
+/* ===== TESTIMONIALS AUTO-SCROLL MARQUEE ===== */
+.testimonials-marquee-container {
+  overflow: hidden;
+  width: 100%;
+  padding: 20px 0;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent, white 15%, white 85%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, white 15%, white 85%, transparent);
+}
+
+.testimonials-marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 24px;
+  animation: marquee-scroll 45s linear infinite;
+}
+
+.testimonials-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.testimonial-card-marquee {
+  width: 350px;
+  flex-shrink: 0;
+  background: var(--white);
+  padding: 24px;
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.testimonial-card-marquee:hover {
+  transform: translateY(-4px);
+  border-color: var(--green-mid);
+}
+
 

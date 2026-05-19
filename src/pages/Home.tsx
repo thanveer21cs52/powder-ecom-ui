@@ -164,38 +164,42 @@ export default function Home() {
             <h2 className="section-title">What Our <span>Family Says</span></h2>
             <p className="section-subtitle">Real experiences from people who made the healthy switch</p>
           </div>
-          <div className="testimonials-grid">
+          <div className="testimonials-marquee-container">
             {loadingFeedbacks ? (
-              <>
+              <div style={{ display: 'flex', gap: '24px' }}>
                 <SkeletonFeedback />
                 <SkeletonFeedback />
                 <SkeletonFeedback />
-              </>
+              </div>
             ) : feedbacks.length === 0 ? (
-              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '48px 24px', background: 'var(--white)', borderRadius: '16px', border: '2px dashed var(--border)' }}>
+              <div style={{ textAlign: 'center', padding: '48px 24px', background: 'var(--white)', borderRadius: '16px', border: '2px dashed var(--border)', width: '100%' }}>
                 <p style={{ color: 'var(--text-mid)', fontWeight: 600, fontSize: '16px', margin: 0 }}>💬 No feedbacks shared yet. Be the first to tell us what you think!</p>
                 <button className="btn-primary" style={{ marginTop: '20px', padding: '10px 24px', fontSize: '14px' }} onClick={() => navigate('/feedback')}>
                   Share Your Feedback
                 </button>
               </div>
             ) : (
-              feedbacks.slice(0, 3).map((f: any) => (
-                <div className="testimonial-card" key={f.id}>
-                  <div className="testimonial-stars" style={{ color: 'var(--yellow)', fontSize: '18px', marginBottom: '12px' }}>
-                    {'★'.repeat(f.rating) + '☆'.repeat(5 - f.rating)}
-                  </div>
-                  <p className="testimonial-text">"{f.message}"</p>
-                  <div className="testimonial-author">
-                    <div className="testimonial-avatar" style={{ fontSize: '20px', background: 'var(--green-pale)', color: 'var(--green-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-                      {f.name.charAt(0).toUpperCase() || '👤'}
+              <div className="testimonials-marquee-track">
+                {[...feedbacks, ...feedbacks, ...feedbacks].map((f: any, idx: number) => (
+                  <div className="testimonial-card-marquee" key={`${f.id}-${idx}`}>
+                    <div className="testimonial-stars" style={{ color: 'var(--yellow)', fontSize: '18px', marginBottom: '12px' }}>
+                      {'★'.repeat(f.rating) + '☆'.repeat(5 - f.rating)}
                     </div>
-                    <div>
-                      <div className="testimonial-name">{f.name}</div>
-                      <div className="testimonial-loc" style={{ fontSize: '11px', color: 'var(--text-light)', marginTop: '2px' }}>Verified Customer</div>
+                    <p className="testimonial-text" style={{ fontSize: '14px', lineHeight: '1.6', color: 'var(--text-dark)', fontStyle: 'italic', margin: '0 0 16px 0', flexGrow: 1 }}>
+                      "{f.message}"
+                    </p>
+                    <div className="testimonial-author" style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: 'auto' }}>
+                      <div className="testimonial-avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', fontSize: '16px', background: 'var(--green-pale)', color: 'var(--green-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', flexShrink: 0 }}>
+                        {f.name.charAt(0).toUpperCase() || '👤'}
+                      </div>
+                      <div>
+                        <div className="testimonial-name" style={{ fontWeight: 700, fontSize: '14px', color: 'var(--text-dark)' }}>{f.name}</div>
+                        <div className="testimonial-loc" style={{ fontSize: '11px', color: 'var(--text-light)', marginTop: '2px' }}>Verified Customer</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </div>

@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import client from '../api/client';
+import { Instagram } from 'lucide-react';
+
 
 export default function Navbar() {
   const { user } = useAuth();
@@ -226,6 +228,18 @@ export default function Navbar() {
               )}
             </div>
 
+            <a 
+              href="https://instagram.com" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              style={{ display: 'flex', alignItems: 'center', color: 'var(--text-mid)', transition: 'color 0.2s', padding: '6px', cursor: 'pointer' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#e1306c'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-mid)'}
+              title="Instagram"
+            >
+              <Instagram size={18} />
+            </a>
+
             <div className="icon-btn" title="Wishlist" onClick={() => navigate('/account', { state: { tab: 'wishlist' } })}>♡</div>
             <div className="icon-btn" title="Cart" onClick={toggleCart}>
               🛒
@@ -354,6 +368,13 @@ export default function Navbar() {
         <Link to="/about" onClick={() => setMobileNavOpen(false)}> About Us</Link>
         <Link to="/contact" onClick={() => setMobileNavOpen(false)}>📞 Contact Us</Link>
         <Link to="/account" onClick={() => setMobileNavOpen(false)}>👤 My Account</Link>
+
+        {/* Mobile Social Links */}
+        <div style={{ display: 'flex', gap: '24px', padding: '20px', borderTop: '1px solid var(--border)', marginTop: '20px', justifyContent: 'center' }}>
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={{ color: '#e1306c', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600 }}>
+            <Instagram size={18} /> Instagram
+          </a>
+        </div>
       </div>
     </>
   );

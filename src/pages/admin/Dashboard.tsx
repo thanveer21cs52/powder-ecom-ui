@@ -678,9 +678,6 @@ const AdminDashboard: React.FC = () => {
             </div>
 
             <div className="admin-panel">
-              <div className="panel-header">
-                <h3>Recent Activity</h3>
-              </div>
               <div className="admin-table-container">
                 <table className="admin-table">
                   <thead>
@@ -738,7 +735,6 @@ const AdminDashboard: React.FC = () => {
 
         return (
           <div className="admin-panel">
-            <h3>Order Management</h3>
             {renderSearchFilterBar('Search by order number, customer name or email...', true, filterOptions)}
             <div className="admin-table-container">
               {paginatedOrders.length === 0 ? (
@@ -813,8 +809,7 @@ const AdminDashboard: React.FC = () => {
 
         return (
           <div className="admin-panel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-              <h3>Inventory Management</h3>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
               <button className="btn-primary" onClick={() => { setEditingProduct(null); setProductForm({ name: '', category_id: 1, description: '', base_price: 0, original_price: 0, discount_pct: 0, main_image: '', image_links: '', tags: [], variants: [], has_discount: false }); setIsProductModalOpen(true); }}>
                 <Plus size={18} /> Add Product
               </button>
@@ -893,7 +888,6 @@ const AdminDashboard: React.FC = () => {
 
         return (
           <div className="admin-panel">
-            <h3>User Directory</h3>
             {renderSearchFilterBar('Search by name or email...', true, userFilterOptions)}
             <div className="admin-table-container">
               {paginatedUsers.length === 0 ? (
@@ -993,7 +987,6 @@ const AdminDashboard: React.FC = () => {
 
         return (
           <div className="admin-panel">
-            <h3>Customer Inquiries</h3>
             {renderSearchFilterBar('Search by name, email, subject or message...')}
             <div className="admin-table-container">
               {paginatedContacts.length === 0 ? (
@@ -1045,8 +1038,7 @@ const AdminDashboard: React.FC = () => {
 
         return (
           <div className="admin-panel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
-              <h3>Categories</h3>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px' }}>
               <button className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', fontSize: '14px' }} onClick={() => {
                 setEditingCategory(null);
                 setCategoryForm({ name: '', emoji: '📁', slug: '' });
@@ -1122,7 +1114,6 @@ const AdminDashboard: React.FC = () => {
 
         return (
           <div className="admin-panel">
-            <h3>Customer Feedbacks</h3>
             {renderSearchFilterBar('Search by name, email or message...', true, ratingFilterOptions)}
             <div className="admin-table-container">
               {paginatedFeedbacks.length === 0 ? (
@@ -1200,7 +1191,6 @@ const AdminDashboard: React.FC = () => {
 
         return (
           <div className="admin-panel">
-            <h3>Product Reviews</h3>
             {renderSearchFilterBar('Search by product, customer or review...', true, ratingFilterOptions)}
             <div className="admin-table-container">
               {paginatedReviews.length === 0 ? (
@@ -1253,7 +1243,32 @@ const AdminDashboard: React.FC = () => {
     <div className="admin-layout">
       {/* Sidebar */}
       <div className="admin-sidebar">
-        <div className="admin-logo">🛡️ Admin Portal</div>
+        <div 
+          onClick={() => navigate('/')} 
+          style={{ 
+            cursor: 'pointer', 
+            background: 'var(--green-dark)', 
+            padding: '24px 20px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            width: '100%', 
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
+            marginBottom: '24px'
+          }}
+        >
+          <div style={{ background: '#ffffff', padding: '6px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--shadow-sm)' }}>
+            <img 
+              src="https://image.qwenlm.ai/public_source/5e7fe444-e1ce-4ec2-aaeb-0a37d63f249f/1b39b99a2-a6b2-4ae5-9bb8-150dabb6bdf6.png" 
+              alt="Ayngaran Logo" 
+              style={{ width: '32px', height: '32px', objectFit: 'contain' }} 
+            />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '16px', fontWeight: '800', color: 'var(--white)', letterSpacing: '1px', textTransform: 'uppercase', lineHeight: '1.2' }}>Ayngaran</span>
+            <span style={{ fontSize: '10px', fontWeight: '600', color: 'rgba(255,255,255,0.6)', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Admin Portal</span>
+          </div>
+        </div>
         <nav className="admin-nav">
           <button className={activeMenu === 'dashboard' ? 'active' : ''} onClick={() => setActiveMenu('dashboard')}><LayoutDashboard size={18} /> Dashboard</button>
           <button className={activeMenu === 'orders' ? 'active' : ''} onClick={() => setActiveMenu('orders')}><ShoppingBag size={18} /> Orders</button>
@@ -1297,14 +1312,16 @@ const AdminDashboard: React.FC = () => {
           </div>
         </header>
 
-        {loading ? (
-          <div className="admin-loading" style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '50vh', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="loading-spinner"></div>
-            <span style={{ fontSize: '14px', color: 'var(--text-mid)', fontWeight: 600 }}>Syncing administrative data...</span>
-          </div>
-        ) : (
-          renderContent()
-        )}
+        <div className="admin-content" style={{ padding: '32px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {loading ? (
+            <div className="admin-loading" style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '50vh', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="loading-spinner"></div>
+              <span style={{ fontSize: '14px', color: 'var(--text-mid)', fontWeight: 600 }}>Syncing administrative data...</span>
+            </div>
+          ) : (
+            renderContent()
+          )}
+        </div>
       </div>
 
       {/* Product Modal */}

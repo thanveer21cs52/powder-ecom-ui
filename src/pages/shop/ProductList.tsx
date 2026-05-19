@@ -5,7 +5,7 @@ import SkeletonProduct from '../../components/SkeletonProduct';
 import client from '../../api/client';
 
 export default function ProductList() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const activeCategory = searchParams.get('category') || 'all';
   
   const [products, setProducts] = useState<any[]>([]);
@@ -44,34 +44,16 @@ export default function ProductList() {
       .finally(() => setLoading(false));
   }, [activeCategory]);
 
-  const handleCategoryClick = (key: string) => {
-    setSearchParams({ category: key });
-  };
-
   const currentCategoryName = categories.find(c => c.key === activeCategory)?.name || 'all products';
 
   return (
     <div className="page active" id="page-products">
       <div className="page-hero">
-        <h1>Our <span>Products</span></h1>
+        <h1>Our <span>{activeCategory !== 'all' ? currentCategoryName : 'Products'}</span></h1>
         <p>100% Natural Traditional Foods</p>
       </div>
 
-      <div className="category-filter-bar">
-        <div className="category-filter-inner">
-          {categories.map(c => (
-            <div 
-              key={c.key}
-              className={`filter-pill ${activeCategory === c.key ? 'active' : ''}`}
-              onClick={() => handleCategoryClick(c.key)}
-            >
-              {c.emoji} {c.name}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="product-count-label">
+      <div className="product-count-label" style={{ marginTop: '32px' }}>
         Showing <strong>{products.length}</strong> products in <strong>{currentCategoryName.toLowerCase()}</strong>
       </div>
 
