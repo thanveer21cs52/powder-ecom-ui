@@ -4,23 +4,34 @@ import ProductCard from '../../components/ProductCard';
 import SkeletonProduct from '../../components/SkeletonProduct';
 import client from '../../api/client';
 
-const categories = [
-  { name:'All', emoji:'🌿', key:'all' },
-  { name:'Podi', emoji:'🌶️', key:'podi' },
-  { name:'Malt', emoji:'🥛', key:'malt' },
-  { name:'Powder', emoji:'🍵', key:'powder' },
-  { name:'Masala', emoji:'🍛', key:'masala' },
-  { name:'Soup', emoji:'🍲', key:'soup' },
-  { name:'Skin Care', emoji:'💆', key:'skincare' },
-  { name:'Others', emoji:'📦', key:'others' }
-];
-
 export default function ProductList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get('category') || 'all';
   
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([
+    { name:'All', emoji:'🌿', key:'all' }
+  ]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch categories
+    client.get('/categories')
+      .then(res => {
+        if (res.data && res.data.categories) {
+          const list = res.data.categories.map((c: any) => ({
+            name: c.name,
+            emoji: c.emoji,
+            key: c.slug
+          }));
+          setCategories([
+            { name:'All', emoji:'🌿', key:'all' },
+            ...list
+          ]);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     setLoading(true);

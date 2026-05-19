@@ -4,24 +4,24 @@ import ProductCard from '../components/ProductCard';
 import SkeletonProduct from '../components/SkeletonProduct';
 import client from '../api/client';
 
-// Keep the hardcoded categories for exact match, or fetch them
-const categories = [
-  { name:'All', emoji:'🌿', key:'all' },
-  { name:'Podi', emoji:'🌶️', key:'podi' },
-  { name:'Malt', emoji:'🥛', key:'malt' },
-  { name:'Powder', emoji:'🍵', key:'powder' },
-  { name:'Masala', emoji:'🍛', key:'masala' },
-  { name:'Soup', emoji:'🍲', key:'soup' },
-  { name:'Skin Care', emoji:'💆', key:'skincare' },
-  { name:'Others', emoji:'📦', key:'others' }
-];
-
 export default function Home() {
   const navigate = useNavigate();
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(true);
 
   useEffect(() => {
+    // Fetch categories
+    client.get('/categories')
+      .then(res => {
+        if (res.data && res.data.categories) {
+          setCategories(res.data.categories);
+        }
+      })
+      .catch(console.error);
+
     // Fetch products
     setLoading(true);
     client.get('/products')
@@ -33,6 +33,17 @@ export default function Home() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+
+    // Fetch feedbacks
+    setLoadingFeedbacks(true);
+    client.get('/feedbacks')
+      .then(res => {
+        if (res.data && res.data.feedbacks) {
+          setFeedbacks(res.data.feedbacks);
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoadingFeedbacks(false));
   }, []);
 
   return (
@@ -70,8 +81,8 @@ export default function Home() {
             <p className="section-subtitle">Explore our carefully curated range of traditional healthy foods</p>
           </div>
           <div className="categories-grid">
-            {categories.slice(1).map(c => (
-              <div key={c.key} className="category-card" onClick={() => navigate(`/shop?category=${c.key}`)}>
+            {categories.map(c => (
+              <div key={c.slug} className="category-card" onClick={() => navigate(`/shop?category=${c.slug}`)}>
                 <div className="category-emoji">{c.emoji}</div>
                 <div className="category-name">{c.name}</div>
               </div>
@@ -154,39 +165,38 @@ export default function Home() {
             <p className="section-subtitle">Real experiences from people who made the healthy switch</p>
           </div>
           <div className="testimonials-grid">
-            <div className="testimonial-card">
-              <div className="testimonial-stars">★★★★★</div>
-              <p className="testimonial-text">"The Moringa Podi has become a daily staple in my family. I can actually feel the difference in my energy levels. Tastes incredibly authentic!"</p>
-              <div className="testimonial-author">
-                <div className="testimonial-avatar">👨</div>
-                <div>
-                  <div className="testimonial-name">Rajesh Kumar</div>
-                  <div className="testimonial-loc">Chennai, TN</div>
-                </div>
+            {loadingFeedbacks ? (
+              <>
+                <SkeletonFeedback />
+                <SkeletonFeedback />
+                <SkeletonFeedback />
+              </>
+            ) : feedbacks.length === 0 ? (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '48px 24px', background: 'var(--white)', borderRadius: '16px', border: '2px dashed var(--border)' }}>
+                <p style={{ color: 'var(--text-mid)', fontWeight: 600, fontSize: '16px', margin: 0 }}>💬 No feedbacks shared yet. Be the first to tell us what you think!</p>
+                <button className="btn-primary" style={{ marginTop: '20px', padding: '10px 24px', fontSize: '14px' }} onClick={() => navigate('/feedback')}>
+                  Share Your Feedback
+                </button>
               </div>
-            </div>
-            <div className="testimonial-card">
-              <div className="testimonial-stars">★★★★★</div>
-              <p className="testimonial-text">"I started giving U-Malt to my kids instead of those sugar-loaded health drinks. They love the taste and I love the ingredients."</p>
-              <div className="testimonial-author">
-                <div className="testimonial-avatar">👩</div>
-                <div>
-                  <div className="testimonial-name">Priya S.</div>
-                  <div className="testimonial-loc">Bangalore, KA</div>
+            ) : (
+              feedbacks.slice(0, 3).map((f: any) => (
+                <div className="testimonial-card" key={f.id}>
+                  <div className="testimonial-stars" style={{ color: 'var(--yellow)', fontSize: '18px', marginBottom: '12px' }}>
+                    {'★'.repeat(f.rating) + '☆'.repeat(5 - f.rating)}
+                  </div>
+                  <p className="testimonial-text">"{f.message}"</p>
+                  <div className="testimonial-author">
+                    <div className="testimonial-avatar" style={{ fontSize: '20px', background: 'var(--green-pale)', color: 'var(--green-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                      {f.name.charAt(0).toUpperCase() || '👤'}
+                    </div>
+                    <div>
+                      <div className="testimonial-name">{f.name}</div>
+                      <div className="testimonial-loc" style={{ fontSize: '11px', color: 'var(--text-light)', marginTop: '2px' }}>Verified Customer</div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div className="testimonial-card">
-              <div className="testimonial-stars">★★★★★</div>
-              <p className="testimonial-text">"The Karuveppilai Podi reminds me of my grandmother's cooking. Perfect mix of spices and curry leaves. Highly recommended!"</p>
-              <div className="testimonial-author">
-                <div className="testimonial-avatar">👱</div>
-                <div>
-                  <div className="testimonial-name">Karthik R.</div>
-                  <div className="testimonial-loc">Coimbatore, TN</div>
-                </div>
-              </div>
-            </div>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -196,3 +206,18 @@ export default function Home() {
     </div>
   );
 }
+
+const SkeletonFeedback = () => (
+  <div className="testimonial-card skeleton-card">
+    <div className="skeleton" style={{ height: '20px', width: '100px', marginBottom: '16px', borderRadius: '4px' }}></div>
+    <div className="skeleton" style={{ height: '14px', width: '100%', marginBottom: '8px', borderRadius: '4px' }}></div>
+    <div className="skeleton" style={{ height: '14px', width: '90%', marginBottom: '24px', borderRadius: '4px' }}></div>
+    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+      <div className="skeleton" style={{ width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0 }}></div>
+      <div style={{ flex: 1 }}>
+        <div className="skeleton" style={{ height: '14px', width: '80px', marginBottom: '6px', borderRadius: '4px' }}></div>
+        <div className="skeleton" style={{ height: '10px', width: '50px', borderRadius: '4px' }}></div>
+      </div>
+    </div>
+  </div>
+);

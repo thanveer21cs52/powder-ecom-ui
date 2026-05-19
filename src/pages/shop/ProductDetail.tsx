@@ -23,6 +23,73 @@ export default function ProductDetail() {
   const [isLiked, setIsLiked] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loadingReviews, setLoadingReviews] = useState(false);
+  const [hoverIntervalId, setHoverIntervalId] = useState<any>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  const isLoggedIn = !!localStorage.getItem('token');
+
+  const handleMouseEnter = () => {
+    if (!product) return;
+    const allImages = [product.main_image, ...(product.image_links || [])].filter(Boolean);
+    if (allImages.length <= 1) return;
+    
+    let currentIndex = allImages.indexOf(activeThumb);
+    if (currentIndex === -1) currentIndex = 0;
+    
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % allImages.length;
+      setActiveThumb(allImages[currentIndex]);
+    }, 1200);
+    
+    setHoverIntervalId(interval);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverIntervalId) {
+      clearInterval(hoverIntervalId);
+      setHoverIntervalId(null);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverIntervalId) clearInterval(hoverIntervalId);
+    };
+  }, [hoverIntervalId]);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!product) return;
+    if (reviewRating < 1 || reviewRating > 5) {
+      toast.error('Please select a rating between 1 and 5 stars');
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      await client.post('/reviews', {
+        productId: product.id,
+        rating: reviewRating,
+        comment: reviewComment
+      });
+      toast.success('Thank you! Your review has been submitted.');
+      setReviewComment('');
+      setReviewRating(5);
+      
+      // Re-fetch reviews
+      client.get(`/reviews/${product.id}`)
+        .then(revRes => {
+          setReviews(revRes.data.reviews || []);
+        })
+        .catch(console.error);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -82,9 +149,13 @@ export default function ProductDetail() {
     toast.success(`✅ ${product.name} (${selectedWeight}) added!`);
   };
 
-  const thumbs = [product.main_image, product.main_image, product.main_image, product.main_image];
-  const originalPriceCalc = selectedPrice ? Math.round(selectedPrice * 1.28) : 0;
-  const discountPct = originalPriceCalc ? Math.round((1 - selectedPrice / originalPriceCalc) * 100) : 0;
+  const thumbs = [product.main_image, ...(product.image_links || [])].filter(Boolean);
+  
+  const productDiscountPct = Number(product.discount_pct) || 0;
+  const productOriginalPrice = product.original_price && Number(product.original_price) > Number(product.base_price)
+    ? Number(product.original_price) + (selectedPrice - Number(product.base_price))
+    : 0;
+  const discountPct = productDiscountPct;
 
   return (
     <div className="page active" id="page-detail">
@@ -97,7 +168,13 @@ export default function ProductDetail() {
 
       <div className="product-detail-inner">
         <div className="product-gallery">
-          <div className="main-img" id="detailMainImg">
+          <div 
+            className="main-img" 
+            id="detailMainImg"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            style={{ cursor: 'zoom-in', position: 'relative' }}
+          >
             <img src={activeThumb} alt={product.name} />
           </div>
           <div className="product-thumbs" id="detailThumbs">
@@ -123,31 +200,51 @@ export default function ProductDetail() {
           </div>
           
           <div className="product-detail-price">₹{selectedPrice}</div>
-          <div className="product-detail-original">
-            ₹{originalPriceCalc} <span className="off">{discountPct}% OFF</span>
-          </div>
+          {discountPct > 0 && productOriginalPrice > 0 && (
+            <div className="product-detail-original">
+              ₹{productOriginalPrice} <span className="off">{discountPct}% OFF</span>
+            </div>
+          )}
           
           <div className="product-detail-desc">{product.description}</div>
           
           {product.variants && product.variants.length > 0 && (
-            <>
-              <div className="detail-option-label">Select Quantity/Weight</div>
-              <div className="weight-options">
+            <div style={{ marginBottom: '24px' }}>
+              <div className="detail-option-label" style={{ marginBottom: '8px', fontWeight: 600 }}>Select Weight / Quantity</div>
+              <select
+                value={selectedWeight}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const variant = product.variants.find((v: any) => v.weight === val);
+                  if (variant) {
+                    handleWeightSelect(variant.weight, variant.price_modifier);
+                  }
+                }}
+                style={{
+                  width: '100%',
+                  maxWidth: '360px',
+                  padding: '12px 16px',
+                  border: '1.5px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  background: 'var(--white)',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  color: 'var(--text-dark)',
+                  boxShadow: 'var(--shadow-sm)'
+                }}
+              >
                 {product.variants.map((v: any) => {
                   const pPrice = Number(product.base_price) + Number(v.price_modifier);
                   return (
-                    <button 
-                      key={v.id}
-                      className={`weight-btn ${selectedWeight === v.weight ? 'active' : ''}`}
-                      onClick={() => handleWeightSelect(v.weight, v.price_modifier)}
-                    >
-                      {v.weight}
-                      <span className="wb-price">₹{pPrice}</span>
-                    </button>
+                    <option key={v.id} value={v.weight}>
+                      {v.weight} (₹{pPrice})
+                    </option>
                   );
                 })}
-              </div>
-            </>
+              </select>
+            </div>
           )}
 
           <div className="detail-option-label">Number of Items</div>
@@ -190,8 +287,99 @@ export default function ProductDetail() {
       </div>
 
       <div className="product-reviews-section section-inner" style={{ marginTop: '60px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '32px' }}>Customer <span>Reviews</span></h2>
+        <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px' }}>Customer <span>Reviews</span></h2>
         
+        {/* Write Review Form */}
+        <div style={{ background: 'var(--cream)', borderRadius: '16px', padding: '24px', marginBottom: '40px', border: '1.5px solid var(--border)' }}>
+          {isLoggedIn ? (
+            <form onSubmit={handleReviewSubmit}>
+              <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--green-dark)', marginBottom: '12px' }}>Leave a Review</h3>
+              
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Rating</label>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: '28px',
+                        color: star <= reviewRating ? 'var(--yellow)' : 'var(--border)',
+                        padding: 0,
+                        marginRight: '4px',
+                        outline: 'none'
+                      }}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: 'var(--text-dark)', marginBottom: '8px' }}>Comment</label>
+                <textarea
+                  rows={3}
+                  value={reviewComment}
+                  onChange={e => setReviewComment(e.target.value)}
+                  placeholder="Share your experience with this product..."
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1.5px solid var(--border)',
+                    fontSize: '14px',
+                    background: 'var(--white)',
+                    outline: 'none',
+                    fontFamily: 'inherit'
+                  }}
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={submittingReview}
+                style={{
+                  background: 'var(--green-dark)',
+                  color: 'var(--white)',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </form>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '12px 0' }}>
+              <p style={{ fontSize: '14px', color: 'var(--text-mid)', marginBottom: '12px' }}>Please log in to write a review for this product.</p>
+              <button
+                onClick={() => navigate('/login')}
+                style={{
+                  background: 'var(--green-mid)',
+                  color: 'var(--white)',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                Log In
+              </button>
+            </div>
+          )}
+        </div>
+
         {loadingReviews ? (
           <div className="skeleton" style={{ height: '100px', width: '100%', borderRadius: '12px' }}></div>
         ) : reviews.length > 0 ? (

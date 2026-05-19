@@ -1,8 +1,13 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
 export default function Footer() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   return (
     <footer>
@@ -27,6 +32,7 @@ export default function Footer() {
             <Link to="/shop">Our Products</Link>
             <Link to="/about">About Us</Link>
             <Link to="/contact">Contact Us</Link>
+            <Link to="/feedback">Feedback</Link>
           </div>
           
           <div className="footer-col">
