@@ -102,9 +102,6 @@ export default function Account() {
             <div className="account-user-email">{user.email}</div>
           </div>
           <div className="account-nav">
-            {user.is_admin && (
-              <a onClick={() => navigate('/admin')} style={{ background: 'var(--green-pale)', color: 'var(--green-dark)', fontWeight: 700, border: '1px solid var(--green-mid)' }}>🛡️ Admin Dashboard</a>
-            )}
             <a onClick={() => setActiveTab('orders')} className={activeTab === 'orders' ? 'active' : ''}>📦 My Orders</a>
             <a onClick={() => setActiveTab('wishlist')} className={activeTab === 'wishlist' ? 'active' : ''}>♡ Wishlist</a>
             <a onClick={() => setActiveTab('profile')} className={activeTab === 'profile' ? 'active' : ''}>⚙️ Profile Settings</a>
