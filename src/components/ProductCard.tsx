@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
 interface Product {
@@ -24,22 +23,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, isHot, isSale }: ProductCardProps) {
   const navigate = useNavigate();
-  const { addToCart } = useCart();
   const [isLiked, setIsLiked] = React.useState(false);
-
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Default to a weight for now, or assume backend base price matches a default weight
-    addToCart({
-      id: product.id,
-      name: product.name,
-      price: Number(product.base_price),
-      qty: 1,
-      weight: '50g',
-      image: product.main_image
-    });
-    toast.success(`✅ ${product.name} (50g) added!`);
-  };
 
   const handleWishlist = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,7 +34,7 @@ export default function ProductCard({ product, isHot, isSale }: ProductCardProps
         return;
       }
       const client = (await import('../api/client')).default;
-      
+
       if (isLiked) {
         await client.delete(`/wishlist/${product.id}`);
         setIsLiked(false);
@@ -89,8 +73,14 @@ export default function ProductCard({ product, isHot, isSale }: ProductCardProps
           <span className="stars">★★★★★</span>
           <span>{product.rating || '4.9'}</span>
         </div>
-        <button className="add-to-cart-btn" onClick={handleAddToCart}>
-          🛒 Add to Cart
+        <button
+          className="add-to-cart-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/product/${product.id}`);
+          }}
+        >
+          View Details
         </button>
       </div>
     </div>

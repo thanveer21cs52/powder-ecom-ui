@@ -150,6 +150,12 @@ export default function ProductDetail() {
   };
 
   const thumbs = [product.main_image, ...(product.image_links || [])].filter(Boolean);
+  const breadcrumbItems = [
+    { label: 'Home', onClick: () => navigate('/') },
+    { label: 'Products', onClick: () => navigate('/shop') },
+    product.category_name ? { label: product.category_name, onClick: () => navigate(`/shop?category=${product.category_slug}`) } : null,
+    { label: product.name, onClick: null },
+  ].filter(Boolean) as Array<{ label: string; onClick: null | (() => void) }>;
   
   const productDiscountPct = Number(product.discount_pct) || 0;
   const productOriginalPrice = product.original_price && Number(product.original_price) > Number(product.base_price)
@@ -160,10 +166,17 @@ export default function ProductDetail() {
   return (
     <div className="page active" id="page-detail">
       <div className="breadcrumb">
-        <span onClick={() => navigate('/')}>Home</span> &gt;{' '}
-        <span onClick={() => navigate('/shop')}>Products</span> &gt;{' '}
-        <span onClick={() => navigate(`/shop?category=${product.category_slug}`)}>{product.category_name}</span> &gt;{' '}
-        <span>{product.name}</span>
+        {breadcrumbItems.map((item, index) => (
+          <span key={item.label}>
+            <span
+              onClick={item.onClick || undefined}
+              className={item.onClick ? 'breadcrumb-link' : 'breadcrumb-current'}
+            >
+              {item.label}
+            </span>
+            {index < breadcrumbItems.length - 1 && <span className="breadcrumb-separator">/</span>}
+          </span>
+        ))}
       </div>
 
       <div className="product-detail-inner">

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import ProductCard from '../../components/ProductCard';
 import SkeletonProduct from '../../components/SkeletonProduct';
 import client from '../../api/client';
 
 export default function ProductList() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const activeCategory = searchParams.get('category') || 'all';
   
   const [products, setProducts] = useState<any[]>([]);
@@ -45,12 +46,35 @@ export default function ProductList() {
   }, [activeCategory]);
 
   const currentCategoryName = categories.find(c => c.key === activeCategory)?.name || 'all products';
+  const handleCategorySelect = (key: string) => {
+    navigate(key === 'all' ? '/shop' : `/shop?category=${key}`);
+  };
 
   return (
     <div className="page active" id="page-products">
       <div className="page-hero">
         <h1>Our <span>{activeCategory !== 'all' ? currentCategoryName : 'Products'}</span></h1>
         <p>100% Natural Traditional Foods</p>
+      </div>
+
+      <div className="shop-filter-bar">
+        <button
+          type="button"
+          className={`shop-filter-chip ${activeCategory === 'all' ? 'active' : ''}`}
+          onClick={() => handleCategorySelect('all')}
+        >
+          All Collections
+        </button>
+        {categories.filter(c => c.key !== 'all').map(cat => (
+          <button
+            key={cat.key}
+            type="button"
+            className={`shop-filter-chip ${activeCategory === cat.key ? 'active' : ''}`}
+            onClick={() => handleCategorySelect(cat.key)}
+          >
+            {cat.emoji} {cat.name}
+          </button>
+        ))}
       </div>
 
       <div className="product-count-label" style={{ marginTop: '32px' }}>
