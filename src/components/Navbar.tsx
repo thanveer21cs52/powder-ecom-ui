@@ -6,10 +6,10 @@ import client from '../api/client';
 import {
   ChevronDown,
   Heart,
-  Instagram,
   Menu,
   Search,
   ShoppingCart,
+  Shield,
   User,
   X,
 } from 'lucide-react';
@@ -22,6 +22,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [mobileCollectionsOpen, setMobileCollectionsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const dropdownCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -75,6 +76,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setShowDropdown(false);
+    setMobileCollectionsOpen(false);
     setSearchOpen(false);
     setMobileNavOpen(false);
   }, [location.pathname]);
@@ -91,12 +93,14 @@ export default function Navbar() {
     ...(user?.is_admin ? [{ name: 'Admin', path: '/admin' }] : []),
   ];
 
+  const closeMobileNav = () => setMobileNavOpen(false);
+
   return (
     <>
       <div className="offer-bar">
         <span>100% Natural Traditional Products - Free Shipping Above Rs 499!</span>
         <button className="offer-btn" onClick={() => navigate('/shop')}>
-          Shop Now →
+          Shop Now {'→'}
         </button>
       </div>
 
@@ -128,11 +132,11 @@ export default function Navbar() {
                     style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                   >
                     {link.name}
-                      <ChevronDown
-                        size={12}
-                        style={{
-                          transition: 'transform 0.3s',
-                          transform: showDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
+                    <ChevronDown
+                      size={12}
+                      style={{
+                        transition: 'transform 0.3s',
+                        transform: showDropdown ? 'rotate(180deg)' : 'rotate(0deg)',
                       }}
                     />
                   </a>
@@ -207,18 +211,6 @@ export default function Navbar() {
               <Search size={18} />
             </button>
 
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', color: 'var(--text-mid)', transition: 'color 0.2s', padding: '6px', cursor: 'pointer' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#e1306c')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-mid)')}
-              title="Instagram"
-            >
-              <Instagram size={18} />
-            </a>
-
             <button
               type="button"
               className="icon-btn"
@@ -251,36 +243,64 @@ export default function Navbar() {
       </header>
 
       <div className={`mobile-nav ${mobileNavOpen ? 'open' : ''}`}>
-        <div className="mobile-nav-close" onClick={() => setMobileNavOpen(false)}>
+        <div className="mobile-nav-close" onClick={closeMobileNav}>
           <X size={20} />
         </div>
 
-        <Link to="/" onClick={() => setMobileNavOpen(false)}>
+        <Link to="/" onClick={closeMobileNav}>
           Home
         </Link>
 
-        <button type="button" className="mobile-search-launcher" onClick={() => setSearchOpen(true)}>
-          <Search size={16} />
-          Search products
-        </button>
+        <div className="mobile-nav-section-title">Quick Actions</div>
+        <div className="mobile-quick-actions">
+          <button type="button" onClick={() => { setSearchOpen(true); closeMobileNav(); }}>
+            <Search size={16} />
+            Search
+          </button>
+          <button type="button" onClick={() => { closeMobileNav(); navigate('/account', { state: { tab: 'wishlist' } }); }}>
+            <Heart size={16} />
+            Wishlist
+          </button>
+          <button type="button" onClick={() => { closeMobileNav(); toggleCart(); }}>
+            <ShoppingCart size={16} />
+            Cart
+          </button>
+          <button type="button" onClick={() => { closeMobileNav(); navigate(user ? '/account' : '/login'); }}>
+            <User size={16} />
+            {user ? 'Account' : 'Sign In'}
+          </button>
+          {user?.is_admin && (
+            <button type="button" onClick={() => { closeMobileNav(); navigate('/admin'); }}>
+              <Shield size={16} />
+              Admin
+            </button>
+          )}
+        </div>
 
         <div style={{ borderBottom: '1px solid var(--border)', padding: '12px 20px' }}>
-          <div
-            onClick={() => setShowDropdown(prev => !prev)}
-            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 600, color: 'var(--text-dark)', cursor: 'pointer' }}
+          <button
+            type="button"
+            onClick={() => setMobileCollectionsOpen(prev => !prev)}
+            className="mobile-collections-toggle"
           >
             <span>Our Collections</span>
-            <span style={{ fontSize: '10px' }}>{showDropdown ? '▲' : '▼'}</span>
-          </div>
+            <ChevronDown
+              size={12}
+              style={{
+                transform: mobileCollectionsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.3s',
+              }}
+            />
+          </button>
 
-          {showDropdown && (
+          {mobileCollectionsOpen && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px', marginTop: '12px' }}>
               {categories.map(cat => (
                 <div
                   key={cat.id}
                   onClick={() => {
-                    setMobileNavOpen(false);
-                    setShowDropdown(false);
+                    closeMobileNav();
+                    setMobileCollectionsOpen(false);
                     navigate(`/shop?category=${cat.slug}`);
                   }}
                   style={{
@@ -300,26 +320,15 @@ export default function Navbar() {
           )}
         </div>
 
-        <Link to="/about" onClick={() => setMobileNavOpen(false)}>
+        <Link to="/about" onClick={closeMobileNav}>
           About Us
         </Link>
-        <Link to="/contact" onClick={() => setMobileNavOpen(false)}>
+        <Link to="/contact" onClick={closeMobileNav}>
           Contact Us
         </Link>
-        <Link to="/account" onClick={() => setMobileNavOpen(false)}>
+        <Link to="/account" onClick={closeMobileNav}>
           My Account
         </Link>
-
-        <div style={{ display: 'flex', gap: '24px', padding: '20px', borderTop: '1px solid var(--border)', marginTop: '20px', justifyContent: 'center' }}>
-          <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: '#e1306c', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600 }}
-          >
-            <Instagram size={18} /> Instagram
-          </a>
-        </div>
       </div>
 
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
