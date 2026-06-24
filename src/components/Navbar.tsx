@@ -102,9 +102,8 @@ export default function Navbar() {
                     {link.name} <span style={{ fontSize: '10px', transition: 'transform 0.3s', transform: showDropdown ? 'rotate(180deg)' : 'rotate(0deg)' }}>▼</span>
                   </a>
                   {showDropdown && (
-                    <div className="nav-dropdown-menu" style={{ width: '640px', display: 'flex', gap: '30px' }}>
-                      {/* Left: Collections */}
-                      <div style={{ flex: 1.8 }}>
+                    <div className="nav-dropdown-menu" style={{ width: '420px' }}>
+                      <div>
                         <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', color: 'var(--green-dark)', borderBottom: '1px solid var(--border)', paddingBottom: '8px', fontWeight: 700 }}>Our Collections</h4>
                         <div className="nav-dropdown-grid" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
                           {categories.map((cat) => (
@@ -124,26 +123,6 @@ export default function Navbar() {
                         </div>
                       </div>
 
-                      {/* Right: Info / Traditional Healthy Foods */}
-                      <div style={{ flex: 1.2, borderLeft: '1.5px solid var(--border)', paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <h4 style={{ margin: 0, fontSize: '14px', color: 'var(--green-dark)', borderBottom: '1px solid var(--border)', paddingBottom: '8px', fontWeight: 700 }}>Traditional Healthy Foods</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          <div 
-                            style={{ padding: '8px 12px', background: 'var(--cream)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: 'var(--text-dark)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                            onClick={() => { setShowDropdown(false); navigate('/shop'); }}
-                          >
-                            <span>Best Sellers</span>
-                            <span style={{ fontSize: '10px', background: 'var(--green-dark)', color: 'var(--white)', padding: '2px 6px', borderRadius: '4px' }}>Top</span>
-                          </div>
-                          <div 
-                            style={{ padding: '8px 12px', background: 'var(--cream)', borderRadius: '8px', fontSize: '12px', fontWeight: 600, color: 'var(--text-dark)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                            onClick={() => { setShowDropdown(false); navigate('/shop'); }}
-                          >
-                            <span>Combo Products</span>
-                            <span style={{ fontSize: '10px', background: 'red', color: 'var(--white)', padding: '2px 6px', borderRadius: '4px' }}>Offers</span>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   )}
                 </div>
